@@ -1,0 +1,36 @@
+/**
+ * Arven Parfum - Main CSS Bundle Entry
+ * ─────────────────────────────────────────────────────────────────────────────
+ * File ini adalah entry point Vite untuk seluruh CSS aplikasi.
+ * Vite akan mengompilasi, menggabungkan, dan meminifikasi semua @import
+ * di bawah menjadi satu file output: public/build/assets/arven-[hash].css
+ *
+ * Cara penggunaan di Blade template:
+ *   @vite(['resources/css/arven.css', 'resources/js/app.js'])
+ *
+ * Jalankan:
+ *   npm run dev   → development (hot reload)
+ *   npm run build → production (minified + hashed)
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ── 1. Global / Shared Styles ─────────────────────────────────────────────── */
+@import '../../public/css/style.css';
+
+/* ── 2. Authentication (Login / Register) ───────────────────────────────────── */
+@import '../../public/css/auth_styles.css';
+
+/* ── 3. Homepage ─────────────────────────────────────────────────────────────── */
+@import '../../public/css/styleindex.css';
+
+/* ── 4. About Page ───────────────────────────────────────────────────────────── */
+@import '../../public/css/styleabout.css';
+
+/* ── 5. Collections / Koleksi Page ──────────────────────────────────────────── */
+@import '../../public/css/stylekoleksi.css';
+
+/* ── 6. Contact Page ─────────────────────────────────────────────────────────── */
+@import '../../public/css/stylecontact.css';
+
+/* ── 7. Shopping Cart Page ───────────────────────────────────────────────────── */
+@import '../../public/css/stylecart.css';
