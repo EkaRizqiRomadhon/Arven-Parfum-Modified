@@ -24,7 +24,7 @@
     --}}
     @vite(['resources/css/arven.css', 'resources/js/app.js'])
 
-    {{-- Font Awesome — tetap dari CDN karena ikon (bukan CSS custom) --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     {{-- Slot untuk CSS/meta tambahan per-halaman --}}

@@ -37,5 +37,45 @@
         <button id="clearBtn" class="btn btn-ghost">Kosongkan Keranjang</button>
       </aside>
     </div>
+
+    <!-- Modal Simulasi Pembayaran -->
+    <div id="paymentModal" class="payment-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: #1a1a1a; width: 100%; max-width: 400px; border-radius: 12px; padding: 25px; border: 1px solid rgba(212, 175, 55, 0.3); text-align: center; position: relative;">
+            <button id="closeModalBtn" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">✕</button>
+            
+            <h2 style="color: #d4af37; margin-bottom: 5px; font-size: 20px;">ARVEN PAY</h2>
+            <p style="color: #aaa; font-size: 14px; margin-bottom: 25px;">Simulasi Payment Gateway Otomatis</p>
+            
+            <div style="font-size: 14px; color: #fff; margin-bottom: 10px;">Total Tagihan:</div>
+            <div id="modalTotalText" style="font-size: 28px; font-weight: 700; margin-bottom: 30px;">Rp 0</div>
+
+            <div style="display: grid; gap: 12px; text-align: left;">
+                <button class="pay-method-btn" onclick="processSimulatedPayment('QRIS')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                    <span>QRIS (OVO, GoPay, Dana)</span>
+                    <span style="color: #d4af37;">▶</span>
+                </button>
+                <button class="pay-method-btn" onclick="processSimulatedPayment('Virtual Account BCA')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                    <span>Virtual Account BCA</span>
+                    <span style="color: #d4af37;">▶</span>
+                </button>
+                <button class="pay-method-btn" onclick="processSimulatedPayment('Virtual Account Mandiri')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                    <span>Virtual Account Mandiri</span>
+                    <span style="color: #d4af37;">▶</span>
+                </button>
+            </div>
+
+            <div id="paymentLoading" style="display: none; margin-top: 20px;">
+                <div style="color: #d4af37; margin-bottom: 10px;">Memproses Pembayaran...</div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                    <div style="width: 50%; height: 100%; background: #d4af37; animation: loadingBar 1s infinite alternate;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .pay-method-btn:hover { background: rgba(212, 175, 55, 0.1) !important; border-color: #d4af37 !important; }
+        @keyframes loadingBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    </style>
   </main>
 @endsection

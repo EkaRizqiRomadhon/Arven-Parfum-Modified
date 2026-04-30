@@ -48,3 +48,8 @@ Route::get('/contact', function () {
 Route::get('/cart', function () {
     return view('cart');
 })->name('cart');
+
+// ─── Route Admin ──────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+});

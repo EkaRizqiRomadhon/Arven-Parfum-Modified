@@ -38,6 +38,7 @@ body {
     color: var(--text);
     font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
     line-height: 1.6;
+    overflow-x: hidden;
     
     /* PENTING: Beri jarak atas agar judul tidak ketutupan navbar */
     /* Sesuaikan nilai 100px dengan tinggi header Anda */
@@ -598,7 +599,7 @@ header.scrolled {
 #content::before {
   content: "";
   position: absolute;
-  inset: -10% -5%;
+  inset: -10% 0;
   background: radial-gradient(
       1100px 500px at 10% 15%,
       rgba(229, 195, 116, 0.12),

@@ -55,7 +55,7 @@
     </div>
   </section>
 
-  <section class="contact-section" style="padding: 60px 20px; text-align: center; color: var(--text)">
+  <section class="contact-section" style="padding: 100px 20px; text-align: center; color: var(--text)">
     <h2 class="section-title center no-anim">HUBUNGI KAMI</h2>
 
     <div class="contact-grid"

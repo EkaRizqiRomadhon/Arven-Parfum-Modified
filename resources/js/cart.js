@@ -177,17 +177,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const checkoutBtn = document.getElementById('checkoutBtn');
-  if (checkoutBtn) {
+  const modal = document.getElementById('paymentModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  
+  if (checkoutBtn && modal) {
     checkoutBtn.addEventListener('click', () => {
        const cart = readCart();
        if(cart.length === 0) return alert("Keranjang kosong");
        
-       if(confirm("Lanjutkan ke pembayaran?")) {
-         alert("Terima kasih! Pesanan Anda sedang diproses.");
-         clearCart(); // Kosongkan cart setelah checkout simulasi
-       }
+       // Hitung total untuk di modal
+       const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+       document.getElementById('modalTotalText').textContent = currency(subtotal);
+       
+       // Tampilkan modal
+       modal.style.display = 'flex';
+    });
+    
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
     });
   }
+
+  // Fungsi yang dipanggil dari tombol di dalam modal
+  window.processSimulatedPayment = function(method) {
+      const loading = document.getElementById('paymentLoading');
+      const buttons = document.querySelectorAll('.pay-method-btn');
+      
+      // Sembunyikan tombol, tampilkan loading
+      buttons.forEach(btn => btn.style.display = 'none');
+      loading.style.display = 'block';
+      
+      // Simulasi delay jaringan (2 detik)
+      setTimeout(() => {
+          alert(`✅ Pembayaran berhasil menggunakan ${method}!\n\nTerima kasih telah berbelanja di ARVEN PARFUME.`);
+          
+          // Kosongkan keranjang & tutup modal
+          clearCart();
+          document.getElementById('paymentModal').style.display = 'none';
+          
+          // Kembalikan state modal ke awal untuk transaksi berikutnya
+          buttons.forEach(btn => btn.style.display = 'flex');
+          loading.style.display = 'none';
+          
+          // Redirect ke halaman sukses (atau beranda)
+          window.location.href = '/';
+      }, 2000);
+  };
 
   // 3. Add to Cart Listeners (Brand Pages)
   window.addToCart = function(id, name, price, image) {
