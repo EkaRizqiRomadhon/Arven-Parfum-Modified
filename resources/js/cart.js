@@ -116,7 +116,7 @@ function renderCart() {
           
           <div class="qty-controls">
             <button onclick="changeQty('${item.id}', -1)">−</button>
-            <input type="text" readonly value="${item.qty}">
+            <span class="qty-value">${item.qty}</span>
             <button onclick="changeQty('${item.id}', 1)">+</button>
           </div>
         </div>
