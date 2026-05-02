@@ -44,6 +44,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Relasi ke Checkout (Satu user memiliki banyak riwayat belanja).
+     */
+    public function checkouts()
+    {
+        return $this->hasMany(Checkout::class);
+    }
+
+    /**
      * Relasi ke ActivityLog (Satu user memiliki banyak log).
      */
     public function activityLogs()

@@ -77,5 +77,49 @@
         .pay-method-btn:hover { background: rgba(212, 175, 55, 0.1) !important; border-color: #d4af37 !important; }
         @keyframes loadingBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
     </style>
+
+    <script>
+    // Fallback: Memastikan fungsi pemanggilan API terdaftar meskipun ada cache pada file JS luar
+    window.processSimulatedPayment = function(method) {
+        const loading = document.getElementById('paymentLoading');
+        const buttons = document.querySelectorAll('.pay-method-btn');
+        
+        // Ambil data dari localStorage (sama seperti di cart.js)
+        const cart = JSON.parse(localStorage.getItem('arven_cart_v1') || '[]');
+        
+        if (cart.length === 0) return alert("Keranjang kosong");
+
+        buttons.forEach(btn => btn.style.display = 'none');
+        loading.style.display = 'block';
+        
+        fetch('/checkout/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ cart: cart })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.snapToken) {
+                alert(`✅ Checkout Berhasil!\nOrder ID: ${data.orderId}\nData telah tersimpan di database.`);
+                localStorage.removeItem('arven_cart_v1');
+                window.location.href = '/';
+            } else {
+                alert("Gagal: " + (data.error || "Terjadi kesalahan"));
+                buttons.forEach(btn => btn.style.display = 'flex');
+                loading.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Kesalahan koneksi ke server.");
+            buttons.forEach(btn => btn.style.display = 'flex');
+            loading.style.display = 'none';
+        });
+    };
+    </script>
   </main>
 @endsection

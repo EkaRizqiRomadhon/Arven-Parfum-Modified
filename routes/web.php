@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CheckoutController;
 
 // ─── Route Autentikasi ──────────────────────────────────────────────────────
 // throttle:5,1 → maks 5 percobaan login per 1 menit per IP (anti brute-force)
@@ -48,6 +49,11 @@ Route::get('/contact', function () {
 Route::get('/cart', function () {
     return view('cart');
 })->name('cart');
+
+// ─── Route Checkout ───────────────────────────────────────────────────────────
+Route::get('/checkout/history', [CheckoutController::class, 'index'])->middleware('auth')->name('checkout.history');
+Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+Route::post('/checkout/notification', [CheckoutController::class, 'notification'])->name('checkout.notification');
 
 // ─── Route Admin ──────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

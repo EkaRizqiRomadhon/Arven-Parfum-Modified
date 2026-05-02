@@ -202,26 +202,53 @@ document.addEventListener('DOMContentLoaded', () => {
   window.processSimulatedPayment = function(method) {
       const loading = document.getElementById('paymentLoading');
       const buttons = document.querySelectorAll('.pay-method-btn');
+      const cart = readCart();
       
+      if (cart.length === 0) return alert("Keranjang kosong");
+
       // Sembunyikan tombol, tampilkan loading
       buttons.forEach(btn => btn.style.display = 'none');
       loading.style.display = 'block';
       
-      // Simulasi delay jaringan (2 detik)
-      setTimeout(() => {
-          alert(`✅ Pembayaran berhasil menggunakan ${method}!\n\nTerima kasih telah berbelanja di ARVEN PARFUME.`);
-          
-          // Kosongkan keranjang & tutup modal
-          clearCart();
-          document.getElementById('paymentModal').style.display = 'none';
-          
-          // Kembalikan state modal ke awal untuk transaksi berikutnya
+      // ─── KIRIM DATA KE BACKEND API ─────────────────────────────────────────
+      // Mengirim data keranjang ke server agar tersimpan di riwayat belanja (database)
+      fetch('/checkout/process', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Accept': 'application/json'
+          },
+          body: JSON.stringify({ cart: cart })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.snapToken) {
+              // Simulasi: Karena ini Arven Pay (Simulasi), kita anggap langsung sukses
+              alert(`✅ Checkout Berhasil!\nOrder ID: ${data.orderId}\n\nPembayaran menggunakan ${method} telah diterima.`);
+              
+              // Kosongkan keranjang & tutup modal
+              clearCart();
+              if (document.getElementById('paymentModal')) {
+                  document.getElementById('paymentModal').style.display = 'none';
+              }
+              
+              // Redirect ke beranda setelah berhasil
+              window.location.href = '/';
+          } else {
+              alert("Gagal memproses checkout: " + (data.error || "Unknown error"));
+              // Kembalikan tombol jika gagal
+              buttons.forEach(btn => btn.style.display = 'flex');
+              loading.style.display = 'none';
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert("Terjadi kesalahan saat menghubungi server.");
+          // Kembalikan tombol jika error
           buttons.forEach(btn => btn.style.display = 'flex');
           loading.style.display = 'none';
-          
-          // Redirect ke halaman sukses (atau beranda)
-          window.location.href = '/';
-      }, 2000);
+      });
   };
 
   // 3. Add to Cart Listeners (Brand Pages)
