@@ -1,15 +1,46 @@
 /* =====================================================
-   VARIABEL & RESET
+   VARIABEL & RESET (Nike-inspired Design System)
 ===================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --text: #f4f4f4; /* Teks utama */
-  --text-dark: #1a1a1a; /* Teks dalam kartu */
-  --muted: #cfcfcf; /* Teks pudar */
-  --bg: #161616; /* Background halaman */
-  --card: #ffffff; /* Background kartu */
-  --gold: #a38b5d; /* Aksen Emas Gelap */
-  --gold-2: #d6c199; /* Aksen Emas Terang */
-  --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  /* Colors */
+  --ink: #111111;
+  --on-primary: #ffffff;
+  --canvas: #ffffff;
+  --soft-cloud: #f5f5f5;
+  --charcoal: #39393b;
+  --ash: #4b4b4d;
+  --mute: #707072;
+  --stone: #9e9ea0;
+  --hairline: #cacacb;
+  --hairline-soft: #e5e5e5;
+  --sale: #d30005;
+  --success: #007d48;
+
+  /* Spacing */
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 18px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 30px;
+  --spacing-section: 48px;
+
+  /* Radius */
+  --rounded-none: 0px;
+  --rounded-sm: 18px;
+  --rounded-md: 24px;
+  --rounded-lg: 30px;
+  --rounded-full: 9999px;
+
+  /* Fallback text colors for older class references */
+  --text: var(--ink);
+  --text-dark: var(--ink);
+  --muted: var(--mute);
+  --bg: var(--canvas);
+  --card: var(--canvas);
 }
 
 * {
@@ -20,29 +51,29 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 64px;
   overflow-x: hidden;
 }
 
 body {
-  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
   min-height: 100vh;
-  line-height: 1.6;
+  line-height: 1.5;
+  padding-top: 64px;
+  /* Space for the flat header */
   overflow-x: hidden;
-
-  /* PENTING: Tambahkan padding-top agar konten tidak tertutup header yang fixed */
-  padding-top: 90px;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: 0.3s;
+  transition: opacity 0.2s;
 }
 
 /* =====================================================
-   HEADER (Fixed Top & Glassmorphism)
+   HEADER & NAV (Flat, Clean)
 ===================================================== */
 header {
   position: fixed;
@@ -50,362 +81,412 @@ header {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--canvas);
+  border-bottom: 1px solid transparent;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  padding: 0 40px;
+  height: 64px;
+  transition: all 0.3s ease;
+}
+
+header.scrolled {
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .logo a {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--gold);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 32px;
+  color: var(--ink);
   text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(163, 139, 93, 0.4);
+  letter-spacing: 1px;
 }
 
-.header-right-nav ul {
+.header-right-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-right-nav nav ul {
   display: flex;
   list-style: none;
-  gap: 30px;
+  gap: 24px;
   align-items: center;
 }
 
-.header-right-nav a {
-  position: relative;
-  color: var(--text);
-  font-size: 13px;
+.nav-link {
+  color: var(--ink);
+  font-size: 16px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  padding: 5px 0;
+  /* body-strong */
+  position: relative;
+  padding: 8px 0;
 }
 
-.header-right-nav a::after {
+/* Hover underline */
+.nav-link:hover::after,
+.nav-link.active::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -3px;
+  bottom: 0;
   height: 2px;
-  width: 0;
-  background: linear-gradient(90deg, var(--gold), var(--gold-2));
-  transition: width 0.3s ease;
-}
-
-.header-right-nav a:hover {
-  color: var(--gold-2);
-}
-
-.header-right-nav a:hover::after {
   width: 100%;
+  background: var(--ink);
 }
 
-/* Header Icons (General) */
+/* Auth Buttons */
+.btn-primary {
+  background-color: var(--ink);
+  color: var(--on-primary);
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  /* Rounded rectangle */
+  padding: 12px 28px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.1s, opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.btn-secondary {
+  background-color: var(--soft-cloud);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  /* Rounded rectangle */
+  padding: 12px 28px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.1s, background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background-color: var(--hairline-soft);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
+/* Icons */
 .header-icons {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
-.header-icons .icon {
-  font-size: 18px;
-  cursor: pointer;
-  transition: color 0.3s;
-  color: var(--text);
-}
-
-.header-icons .icon:hover {
-  color: var(--gold);
-}
-
-/* Cart Specific Styles */
-.cart-icon {
-  font-size: 20px;
-  position: relative;
+.icon-circular {
+  background: var(--canvas);
+  color: var(--ink);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--rounded-full);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  transition: background 0.2s;
+  position: relative;
+  text-decoration: none;
+}
+
+.icon-circular:hover {
+  background: var(--soft-cloud);
 }
 
 .cart-badge {
-  background-color: var(--gold);
-  color: #000;
+  background-color: var(--ink);
+  color: var(--on-primary);
   font-size: 10px;
   font-weight: bold;
-  padding: 0;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--rounded-full);
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 50%;
   position: absolute;
-  top: -8px;
-  right: -10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  top: -4px;
+  right: -4px;
 }
 
 /* =====================================================
-   HALAMAN UMUM (Container & Typography)
+   HALAMAN UMUM
 ===================================================== */
 .page-container {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--spacing-section) 40px;
 }
 
 .page-container h1 {
-  text-align: center;
-  color: var(--gold);
-  font-size: 38px;
-  margin-bottom: 50px;
+  font-family: "Bebas Neue", sans-serif;
+  color: var(--ink);
+  font-size: 48px;
+  margin-bottom: var(--spacing-section);
   text-transform: uppercase;
-  letter-spacing: 3px;
-  text-shadow: 0 0 15px rgba(163, 139, 93, 0.5);
+  letter-spacing: 0;
+  text-align: center;
 }
 
 /* =====================================================
-   GRID PRODUK (Untuk Halaman Koleksi)
+   GRID PRODUK
 ===================================================== */
 .perfume-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 40px;
-  padding-bottom: 80px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-sm);
+  /* Tight gutters */
+  padding-bottom: var(--spacing-section);
 }
 
 .perfume-card {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 25px;
+  background: var(--canvas);
+  border-radius: var(--rounded-none);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow);
-  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
-    box-shadow 0.4s ease;
-  overflow: hidden;
-  position: relative;
+  box-shadow: none;
+  border: none;
 }
 
-.perfume-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
-}
-
-.perfume-card img {
+.perfume-card-img-wrapper {
+  background-color: var(--soft-cloud);
   width: 100%;
-  height: 250px;
-  object-fit: contain;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
-  transition: transform 0.3s ease;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
+  padding: 24px;
 }
 
-.perfume-card:hover img {
-  transform: scale(1.05);
+.perfume-card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+/* Temporary backward compatibility for old HTML structure */
+.perfume-card>img {
+  background-color: var(--soft-cloud);
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  margin-bottom: var(--spacing-sm);
 }
 
 .perfume-card h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #111;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.perfume-card .price {
-  font-size: 20px;
-  color: var(--gold);
-  font-weight: 800;
-  margin-bottom: 12px;
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 600;
+  /* body-strong */
+  margin-bottom: var(--spacing-xs);
 }
 
 .perfume-card p:not(.price) {
   font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 25px;
-  flex-grow: 1;
+  color: var(--mute);
+  margin-bottom: var(--spacing-xs);
+}
+
+.perfume-card .price {
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
 }
 
 .add-to-cart {
-  background: transparent;
-  color: #000;
-  border: 2px solid #000;
+  background: var(--canvas);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
   padding: 12px;
   border-radius: 8px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  /* Rounded rectangle */
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   width: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  text-align: center;
 }
 
 .add-to-cart:hover {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: #fff;
-  box-shadow: 0 5px 15px rgba(163, 139, 93, 0.4);
-  transform: translateY(-2px);
+  border-color: var(--ink);
 }
 
 .add-to-cart:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 /* =====================================================
-   DETAIL PRODUK (Baru Ditambahkan)
+   DETAIL PRODUK 
 ===================================================== */
 .product-detail-section {
   display: flex;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px 80px; /* Padding top disesuaikan karena ada body-padding */
-  gap: 50px;
+  padding: var(--spacing-section) 40px;
+  gap: var(--spacing-xl);
   align-items: flex-start;
 }
 
 .product-image-container {
-  flex: 0 0 45%;
-  background-color: var(--card); /* Konsisten pakai putih */
-  padding: 40px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: var(--shadow);
+  flex: 0 0 50%;
+  background-color: var(--soft-cloud);
+  border-radius: var(--rounded-none);
+  padding: 0;
+  box-shadow: none;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image-container img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.15));
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .product-info {
   flex: 1;
+  padding-top: var(--spacing-lg);
 }
 
 .product-info .brand {
-  font-size: 14px;
-  color: var(--gold);
-  margin-bottom: 10px;
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
   display: block;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .product-info h1 {
-  font-size: 40px;
-  margin-bottom: 15px;
-  color: var(--text);
+  font-family: "Helvetica Now Display Medium", "Inter", sans-serif;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: var(--spacing-lg);
+  color: var(--ink);
   line-height: 1.2;
 }
 
 .product-info .price {
-  font-size: 32px;
-  font-weight: bold;
-  color: var(--gold);
-  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: var(--spacing-xl);
   display: block;
 }
 
 .product-info h2 {
-  font-size: 18px;
-  margin-top: 30px;
-  margin-bottom: 15px;
-  color: var(--text);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: var(--spacing-xxl);
+  margin-bottom: var(--spacing-md);
+  color: var(--ink);
+  text-transform: none;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--spacing-sm);
 }
 
 .product-info p,
 .product-info ul {
   font-size: 16px;
-  margin-bottom: 20px;
-  color: var(--muted);
-  line-height: 1.8;
-}
-
-.product-info ul {
-  list-style: none;
-  padding-left: 0;
+  color: var(--ink);
+  line-height: 1.75;
+  margin-bottom: var(--spacing-md);
 }
 
 .product-info ul li {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  padding-left: 16px;
   position: relative;
-  padding-left: 20px;
 }
 
 .product-info ul li::before {
-  content: "•";
+  content: "-";
   position: absolute;
   left: 0;
-  color: var(--gold);
-  font-weight: bold;
-  font-size: 20px;
-  line-height: 1;
+  color: var(--mute);
 }
 
-/* Tombol Khusus Halaman Detail */
 .add-to-cart-button {
-  background-color: var(--gold);
-  color: #000;
-  padding: 16px 45px;
-  text-decoration: none;
-  text-transform: uppercase;
+  background-color: var(--ink);
+  color: var(--on-primary);
+  padding: 16px 32px;
   font-size: 16px;
+  font-weight: 500;
   border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-block;
-  font-weight: 800;
-  margin-top: 30px;
   border-radius: 8px;
-  letter-spacing: 1px;
+  /* Rounded rectangle */
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: var(--spacing-xl);
 }
 
 .add-to-cart-button:hover {
-  background-color: var(--gold-2);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(163, 139, 93, 0.3);
+  opacity: 0.9;
 }
 
-/* Responsif Halaman Detail */
+.add-to-cart-button:active {
+  transform: scale(0.98);
+}
+
+/* Responsif */
 @media (max-width: 900px) {
   .product-detail-section {
     flex-direction: column;
-    padding: 20px;
+    padding: var(--spacing-xl) 20px;
   }
 
   .product-image-container {
     flex: 0 0 100%;
     width: 100%;
-    margin-bottom: 30px;
-  }
-
-  .product-info h1 {
-    font-size: 32px;
   }
 }
 
 @media (max-width: 768px) {
-  /* Inherit dari atas, tambah penyesuaian header */
   header {
-    padding: 15px 20px;
+    padding: 0 20px;
   }
-  body {
-    padding-top: 80px;
+
+  .header-right-nav nav {
+    display: none;
+    /* Menu logic handled via JS usually */
+  }
+
+  .page-container {
+    padding: var(--spacing-xl) 20px;
   }
 }

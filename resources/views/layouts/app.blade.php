@@ -25,6 +25,7 @@
     @vite(['resources/css/arven.css', 'resources/js/app.js'])
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="auth-check" content="{{ Auth::check() ? 'true' : 'false' }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     {{-- Slot untuk CSS/meta tambahan per-halaman --}}
@@ -40,74 +41,51 @@
       <div class="header-right-nav">
         <nav>
           <ul>
-            <li><a href="{{ url('/') }}">BERANDA</a></li>
-            <li><a href="{{ url('/about') }}">TENTANG KAMI</a></li>
-            <li><a href="{{ url('/koleksi') }}">KOLEKSI</a></li>
-            <li><a href="{{ url('/contact') }}">KONTAK</a></li>
-            <li>
-              <a href="{{ url('/cart') }}" class="icon" title="Keranjang"
-                style="position:relative;text-decoration:none;color:inherit;display:flex;align-items:center;">
+            <li><a href="{{ url('/') }}" class="nav-link {{ request()->is('/') ? 'active' : '' }}">BERANDA</a></li>
+            <li><a href="{{ url('/about') }}" class="nav-link {{ request()->is('about') ? 'active' : '' }}">TENTANG KAMI</a></li>
+            <li><a href="{{ url('/koleksi') }}" class="nav-link {{ request()->is('koleksi') ? 'active' : '' }}">KOLEKSI</a></li>
+            <li><a href="{{ url('/contact') }}" class="nav-link {{ request()->is('contact') ? 'active' : '' }}">KONTAK</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="{{ url('/cart') }}" class="icon-circular" title="Keranjang">
                 <i class="fas fa-shopping-cart"></i>
-                <span id="cartBadge" class="cart-badge"
-                  style="display:none;position:absolute;top:-8px;right:-8px;
-                         background:#a38b5d;color:#000;border-radius:50%;
-                         font-size:10px;padding:0;width:16px;height:16px;
-                         justify-content:center;align-items:center;font-weight:bold;">
-                  0
-                </span>
+                <span id="cartBadge" class="cart-badge" style="display:none;">0</span>
               </a>
+              @if(Auth::check())
+              <a href="{{ route('checkout.history') }}" class="icon-circular {{ request()->routeIs('checkout.history') ? 'active' : '' }}" title="Riwayat Pesanan">
+                <i class="fas fa-receipt"></i>
+              </a>
+              <a href="{{ route('profile.edit') }}" class="icon-circular {{ request()->routeIs('profile.edit') ? 'active' : '' }}" title="Profil Saya">
+                <i class="fas fa-user"></i>
+              </a>
+              @endif
             </li>
 
             {{-- ── Tombol Auth: SSR Laravel menggantikan auth.js lama ──────────── --}}
-            @auth
-              <li style="display: flex; align-items: center; gap: 20px; margin-left: 20px;">
-                <span style="color: #c4a56a; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">
+
+            @if(Auth::check())
+              @if(Auth::user()->role === 'admin')
+                <li style="margin-left: 12px;">
+                  <a href="{{ route('admin.dashboard') }}" class="btn-primary" style="background: var(--sale);">
+                    Admin Panel
+                  </a>
+                </li>
+              @endif
+              <li style="display: flex; align-items: center; gap: 16px; margin-left: 12px;">
+                <span style="color: var(--ink); font-size: 14px; font-weight: 500;">
                   Halo, {{ Auth::user()->full_name }}
                 </span>
                 <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                   @csrf
-                  <button type="submit" style="
-                      background: transparent;
-                      border: 1.5px solid #c4a56a;
-                      color: #c4a56a;
-                      padding: 8px 20px;
-                      border-radius: 8px;
-                      cursor: pointer;
-                      font-size: 12px;
-                      font-weight: 700;
-                      letter-spacing: 1px;
-                      text-transform: uppercase;
-                      transition: all 0.3s ease;
-                      font-family: inherit;
-                  " 
-                  onmouseover="this.style.background='#c4a56a'; this.style.color='#161616';"
-                  onmouseout="this.style.background='transparent'; this.style.color='#c4a56a';">
-                    LOGOUT
-                  </button>
+                  <button type="submit" class="btn-secondary">Logout</button>
                 </form>
               </li>
             @else
-              <li style="margin-left: 20px;">
-                <a href="{{ route('login') }}" style="
-                    background: linear-gradient(135deg, #c4a56a, #a38b5d);
-                    color: #161616;
-                    padding: 10px 24px;
-                    border-radius: 8px;
-                    text-decoration: none;
-                    font-size: 12px;
-                    font-weight: 800;
-                    letter-spacing: 1.2px;
-                    text-transform: uppercase;
-                    transition: all 0.3s ease;
-                    display: inline-block;
-                    box-shadow: 0 4px 12px rgba(196, 165, 106, 0.3);
-                "
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(196, 165, 106, 0.4)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(196, 165, 106, 0.3)';">
-                  LOGIN
+              <li style="margin-left: 12px;">
+                <a href="{{ route('login') }}" class="btn-primary">
+                  Login
                 </a>
               </li>
-            @endauth
+            @endif
 
           </ul>
         </nav>
@@ -121,5 +99,93 @@
 
     {{-- ── SCRIPT TAMBAHAN PER-HALAMAN (opsional) ────────────────────── --}}
     @stack('scripts')
+
+    {{-- ── TOAST NOTIFICATION CONTAINER ─────────────────────────────── --}}
+    <div id="toastContainer" style="
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+    "></div>
+
+    <style>
+        .arven-toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--ink);
+            color: var(--canvas);
+            font-family: "Helvetica Now Text", "Inter", sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 280px;
+            max-width: 360px;
+            border: none;
+            border-left: 3px solid var(--canvas);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            pointer-events: all;
+            cursor: default;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .arven-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .arven-toast.toast-success { border-left-color: #1eaa52; }
+        .arven-toast.toast-error   { border-left-color: #d30005; }
+        .arven-toast.toast-info    { border-left-color: #cacacb; }
+        .arven-toast-icon {
+            font-size: 16px;
+            line-height: 1;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+        .arven-toast-body { flex: 1; line-height: 1.5; }
+        .arven-toast-title {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            font-size: 11px;
+            opacity: 0.6;
+        }
+        .arven-toast-msg { font-size: 14px; }
+    </style>
+
+    <script>
+        function showToast(message, type = 'success', title = null) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `arven-toast toast-${type}`;
+
+            const icons = { success: '✓', error: '✕', info: '→' };
+            const defaultTitles = { success: 'Berhasil', error: 'Gagal', info: 'Info' };
+
+            toast.innerHTML = `
+                <div class="arven-toast-icon">${icons[type] || '→'}</div>
+                <div class="arven-toast-body">
+                    <div class="arven-toast-title">${title || defaultTitles[type]}</div>
+                    <div class="arven-toast-msg">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => toast.classList.add('show'));
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            }, 3500);
+        }
+    </script>
   </body>
 </html>

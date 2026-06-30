@@ -39,7 +39,19 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
+            'driver'   => 'session',
+            'provider' => 'users',
+        ],
+
+        // Guard terpisah khusus Admin Panel
+        'admin' => [
+            'driver'   => 'session',
+            'provider' => 'admins',
+        ],
+
+        // Guard untuk API — stateless, menggunakan JWT token
+        'api' => [
+            'driver'   => 'jwt',
             'provider' => 'users',
         ],
     ],
@@ -64,13 +76,14 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model'  => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // Provider admin — sama-sama dari tabel users
+        'admins' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\User::class,
+        ],
     ],
 
     /*

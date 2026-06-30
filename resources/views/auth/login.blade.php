@@ -1,154 +1,211 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ARVEN PARFUME</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+@extends('layouts.app')
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 20px;
-        }
+@section('title', 'Login - ARVEN PARFUME')
 
-        .login-container {
-            background: rgba(40, 40, 40, 0.95);
-            border-radius: 20px;
-            padding: 40px 35px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(163, 139, 93, 0.2);
-        }
+@section('content')
+<style>
+    .auth-page {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--canvas);
+        padding: var(--spacing-section) 20px;
+    }
 
-        .logo-title { text-align: center; margin-bottom: 10px; }
-        .logo-title h1 {
-            color: #c4a56a;
-            font-size: 32px;
-            letter-spacing: 3px;
-            font-weight: 800;
-            text-shadow: 0 2px 10px rgba(196, 165, 106, 0.3);
-        }
+    .auth-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--canvas);
+        padding: 40px;
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+    }
 
-        .subtitle { text-align: center; color: #aaa; font-size: 15px; margin-bottom: 35px; }
+    .auth-logo {
+        text-align: left;
+        margin-bottom: var(--spacing-md);
+    }
+    .auth-logo h1 {
+        color: var(--ink);
+        font-family: "Helvetica Now Display Medium", "Inter", sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+    }
 
-        .form-group { margin-bottom: 22px; }
-        .form-group label { display: block; color: #ddd; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .auth-subtitle {
+        color: var(--charcoal);
+        font-size: 16px;
+        margin-bottom: var(--spacing-xl);
+    }
 
-        .input-wrapper { position: relative; }
+    .auth-form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .auth-form-group input {
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--soft-cloud);
+        border: 1px solid transparent;
+        border-radius: 8px; /* Rounded rectangle */
+        color: var(--ink);
+        font-size: 16px;
+        font-family: "Helvetica Now Text", "Inter", sans-serif;
+        outline: none;
+        transition: all 0.2s ease;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(60, 60, 60, 0.6);
-            border: 1px solid rgba(163, 139, 93, 0.3);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        .form-group input::placeholder { color: #888; }
-        .form-group input:focus {
-            border-color: #c4a56a;
-            background: rgba(70, 70, 70, 0.7);
-            box-shadow: 0 0 0 3px rgba(196, 165, 106, 0.15);
-        }
-        .form-group input.is-invalid { border-color: #ff6b6b; }
+    .auth-form-group input::placeholder {
+        color: var(--mute);
+    }
 
-        .password-toggle {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #888;
-            font-size: 18px;
-            user-select: none;
-            transition: color 0.3s;
-        }
-        .password-toggle:hover { color: #c4a56a; }
+    .auth-form-group input:focus {
+        background: var(--canvas);
+        border-color: var(--ink);
+    }
 
-        .field-error { color: #ff6b6b; font-size: 12px; margin-top: 5px; display: block; }
+    .auth-form-group input.is-invalid {
+        border-color: var(--sale);
+    }
 
-        .remember-me { display: flex; align-items: center; gap: 8px; margin-bottom: 25px; }
-        .remember-me input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #c4a56a; }
-        .remember-me label { color: #ddd; font-size: 14px; cursor: pointer; user-select: none; }
+    .auth-input-wrapper {
+        position: relative;
+    }
 
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #c4a56a 0%, #a38b5d 100%);
-            color: #1a1a1a;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(196, 165, 106, 0.3);
-        }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(196, 165, 106, 0.4); }
-        .login-btn:active { transform: translateY(0); }
+    .password-toggle {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--mute);
+        font-size: 14px;
+        user-select: none;
+        font-weight: 500;
+    }
 
-        .register-link { text-align: center; margin-top: 25px; color: #aaa; font-size: 14px; }
-        .register-link a { color: #c4a56a; text-decoration: none; font-weight: 600; transition: color 0.3s; }
-        .register-link a:hover { color: #d4b57a; text-decoration: underline; }
+    .password-toggle:hover {
+        color: var(--ink);
+    }
 
-        .alert-box {
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            background: rgba(220, 53, 69, 0.2);
-            border: 1px solid rgba(220, 53, 69, 0.5);
-            color: #ff6b6b;
-        }
+    .field-error {
+        color: var(--sale);
+        font-size: 12px;
+        margin-top: 6px;
+        display: block;
+        font-weight: 500;
+    }
 
-        @media (max-width: 480px) {
-            .login-container { padding: 30px 25px; }
-            .logo-title h1 { font-size: 26px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo-title">
-            <h1>ARVEN PARFUME</h1>
+    .remember-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--ink);
+        cursor: pointer;
+    }
+
+    .remember-me label {
+        color: var(--ink);
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .forgot-link {
+        color: var(--mute);
+        font-size: 14px;
+        text-decoration: underline;
+    }
+
+    .forgot-link:hover {
+        color: var(--ink);
+    }
+
+    .auth-btn {
+        width: 100%;
+        background: var(--ink);
+        color: var(--on-primary);
+        font-family: "Helvetica Now Text Medium", "Inter", sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .auth-btn:hover {
+        opacity: 0.8;
+    }
+    
+    .auth-btn:active {
+        transform: scale(0.98);
+        opacity: 0.5;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: var(--spacing-xl);
+        color: var(--mute);
+        font-size: 14px;
+    }
+
+    .auth-footer a {
+        color: var(--ink);
+        font-weight: 500;
+        text-decoration: underline;
+    }
+
+    .auth-alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        background: #fef0f0;
+        color: var(--sale);
+        border: 1px solid #fcdcdc;
+    }
+</style>
+
+<main class="auth-page">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <h1>LOGIN</h1>
+            <p class="auth-subtitle">Masuk untuk melanjutkan belanja.</p>
         </div>
-        <p class="subtitle">Login untuk melanjutkan</p>
 
-        {{-- Error dari Laravel (email/password salah) --}}
         @if($errors->any())
-            <div class="alert-box">
+            <div class="auth-alert">
                 @foreach($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
             </div>
         @endif
 
-        {{--
-            Form dikirim ke route 'login.attempt' (POST /login).
-            @csrf wajib ada — tanpanya Laravel akan error 419.
-            'remember' → nama checkbox yang dikenal Laravel untuk "ingat saya".
-        --}}
         <form action="{{ route('login.attempt') }}" method="POST">
             @csrf
 
-            <div class="form-group">
-                <label for="email">Email</label>
+            <div class="auth-form-group">
                 <input
                     type="email"
                     id="email"
                     name="email"
-                    placeholder="nama@contoh.com"
+                    placeholder="Alamat Email"
                     value="{{ old('email') }}"
                     required
                     autocomplete="email"
@@ -159,46 +216,47 @@
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="input-wrapper">
+            <div class="auth-form-group">
+                <div class="auth-input-wrapper">
                     <input
                         type="password"
                         id="password"
                         name="password"
-                        placeholder="Masukkan password"
+                        placeholder="Password"
                         required
                         autocomplete="current-password"
                         class="{{ $errors->has('password') ? 'is-invalid' : '' }}"
                     >
-                    <span class="password-toggle" id="togglePassword">👁️</span>
+                    <span class="password-toggle" id="togglePassword">SHOW</span>
                 </div>
                 @error('password')
                     <span class="field-error">{{ $message }}</span>
                 @enderror
             </div>
 
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                <label for="remember">Ingat saya</label>
+            <div class="remember-row">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                    <label for="remember">Ingat saya</label>
+                </div>
+                <a href="{{ route('password.request') }}" class="forgot-link">Lupa password?</a>
             </div>
 
-            <button type="submit" class="login-btn">LOGIN</button>
+            <button type="submit" class="auth-btn">MASUK</button>
         </form>
 
-        <div class="register-link">
-            Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a>
+        <div class="auth-footer">
+            Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang.</a>
         </div>
     </div>
+</main>
 
-    <script>
-        // Toggle password visibility (ini aman dipertahankan, bukan fetch)
-        document.getElementById('togglePassword').addEventListener('click', function () {
-            const input = document.getElementById('password');
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-            this.textContent = isPassword ? '🙈' : '👁️';
-        });
-    </script>
-</body>
-</html>
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const input = document.getElementById('password');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        this.textContent = isPassword ? 'HIDE' : 'SHOW';
+    });
+</script>
+@endsection

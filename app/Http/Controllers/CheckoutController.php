@@ -8,24 +8,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\PaymentService;
 
 class CheckoutController extends Controller
 {
+    protected $paymentService;
+
+    public function __construct(PaymentService $paymentService)
+    {
+        $this->paymentService = $paymentService;
+    }
+
     /**
-     * Menampilkan riwayat belanja pengguna (API).
+     * Menampilkan halaman riwayat belanja pengguna.
      */
     public function index()
     {
-        if (!auth()->check()) {
-            return response()->json(['error' => 'Silakan login untuk melihat riwayat'], 401);
-        }
-
-        $checkouts = Checkout::with('items')
-            ->where('user_id', auth()->id())
+        $orders = Checkout::with('items')
+            ->where('user_id', \Illuminate\Support\Facades\Auth::id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
-        return response()->json($checkouts);
+        return view('history', compact('orders'));
     }
 
     /**
@@ -58,16 +62,27 @@ class CheckoutController extends Controller
             
             // 3. Simpan ke database (Riwayat Belanja)
             $checkout = Checkout::create([
-                'user_id'      => auth()->check() ? auth()->id() : null,
-                'order_id'     => $orderId,
-                'gross_amount' => $grossAmount,
-                'status'       => 'success', // Langsung success karena simulasi
-                'snap_token'   => 'SIMULATION-' . Str::random(20),
-                'payment_type' => 'simulation',
+                'user_id'        => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::id() : null,
+                'order_id'       => $orderId,
+                'gross_amount'   => $grossAmount,
+                'status'         => 'pending',
+                'payment_status' => 'pending',
             ]);
 
             foreach ($cart as $item) {
                 $qty = $item['qty'] ?? ($item['quantity'] ?? 0);
+                
+                $product = \App\Models\Product::find($item['id']);
+                if (!$product) {
+                    throw new \Exception("Produk {$item['name']} tidak ditemukan.");
+                }
+                
+                if ($product->stock < $qty) {
+                    throw new \Exception("Stok untuk produk {$item['name']} tidak mencukupi (Sisa: {$product->stock}).");
+                }
+                
+                $product->decrement('stock', $qty);
+
                 CheckoutItem::create([
                     'checkout_id' => $checkout->id,
                     'product_id'  => $item['id'],
@@ -78,14 +93,17 @@ class CheckoutController extends Controller
                 ]);
             }
 
+            // 4. Inisialisasi Payment via Service
+            $snapToken = $this->paymentService->createPayment($checkout);
+
             DB::commit();
             Log::info('Simulated Checkout Successfully Saved', ['order_id' => $orderId]);
 
             return response()->json([
                 'success'   => true,
-                'message'   => 'Pesanan berhasil disimpan (Simulasi)',
+                'message'   => 'Pesanan berhasil disimpan.',
                 'orderId'   => $orderId,
-                'snapToken' => $checkout->snap_token // Tetap kembalikan token simulasi agar frontend tidak error
+                'snapToken' => $snapToken 
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -95,10 +113,42 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Notification handler (Tidak digunakan dalam mode simulasi, tapi dibiarkan ada)
+     * Notification handler
      */
     public function notification(Request $request)
     {
         return response()->json(['status' => 'simulation_mode_active']);
+    }
+
+    /**
+     * Simulator: Proses pembayaran (ubah ke processing)
+     */
+    public function simulatePaymentProcess(Request $request, $orderId)
+    {
+        $order = Checkout::where('order_id', $orderId)->firstOrFail();
+        
+        $paymentType = $request->input('method', 'simulation');
+        $this->paymentService->processPayment($order, $paymentType);
+        
+        return response()->json([
+            'success' => true,
+            'status' => 'processing'
+        ]);
+    }
+
+    /**
+     * Simulator: Update status akhir (paid/failed)
+     */
+    public function updatePaymentStatus(Request $request, $orderId)
+    {
+        $order = Checkout::where('order_id', $orderId)->firstOrFail();
+        
+        $status = $request->input('status', 'paid');
+        $this->paymentService->updateStatus($order, $status);
+        
+        return response()->json([
+            'success' => true,
+            'status' => $status
+        ]);
     }
 }

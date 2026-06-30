@@ -10,9 +10,29 @@
 [![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-> Toko parfum online yang elegan dengan pengalaman belanja yang mulus, dilengkapi sistem autentikasi pengguna, keranjang belanja interaktif, dan integrasi pembayaran Midtrans.
+> Toko parfum online yang elegan dengan pengalaman belanja yang mulus, dilengkapi sistem autentikasi pengguna, keranjang belanja interaktif, dan integrasi simulasi pembayaran.
 
 </div>
+
+---
+
+> [!WARNING]
+> **DISCLAIMER / PENGINGAT:**
+> Proyek Arven Parfum ini dibuat **HANYA UNTUK KEPERLUAN LATIHAN DAN PEMBELAJARAN**. Aplikasi ini menggunakan simulasi payment gateway dan tidak ditujukan untuk memproses transaksi uang sungguhan. Jangan menggunakan data kartu kredit atau akun bank asli saat menguji fitur pembayaran di website ini.
+
+---
+
+## 📸 Dokumentasi Tampilan Website
+
+<!-- SILAKAN TARUH SCREENSHOT TAMPILAN WEBSITE ANDA DI BAWAH INI -->
+
+*(Tambahkan gambar/screenshot tampilan halaman Beranda, Koleksi, Keranjang, dan Simulasi Payment Gateway Anda di sini)*
+
+```markdown
+<!-- Contoh Format Menambahkan Gambar -->
+![Halaman Beranda](/path/to/screenshot-beranda.png)
+![Halaman Simulasi Pembayaran](/path/to/screenshot-payment.png)
+```
 
 ---
 
@@ -26,9 +46,6 @@
 - [Instalasi & Setup](#-instalasi--setup)
 - [Konfigurasi Environment](#-konfigurasi-environment)
 - [Menjalankan Aplikasi](#-menjalankan-aplikasi)
-- [Panduan Penggunaan](#-panduan-penggunaan)
-- [Kontribusi](#-kontribusi)
-- [Lisensi](#-lisensi)
 
 ---
 
@@ -45,20 +62,22 @@ Proyek ini dibangun sebagai portfolio pengembangan web full-stack menggunakan ek
 ### 🛍️ Fitur Pelanggan
 - **Halaman Beranda** — Tampilan produk unggulan dan koleksi terbaru
 - **Katalog Koleksi** — Jelajahi parfum berdasarkan brand/kategori
-- **Keranjang Belanja** — Tambah, ubah jumlah, dan hapus produk secara dinamis (berbasis `localStorage`)
-- **Checkout & Pembayaran** — Proses checkout dengan integrasi Midtrans (mode simulasi tersedia)
+- **Keranjang Belanja** — Tambah, ubah jumlah, dan hapus produk (berbasis `localStorage`)
+- **Stok Terintegrasi** — Validasi otomatis yang tidak mengizinkan pesanan melebihi stok yang ada
+- **Checkout & Pembayaran** — Proses checkout simulasi ala *Nike MD style* (pending -> processing -> paid)
 - **Riwayat Pesanan** — Lihat histori transaksi setelah login
+- **Profil User** — Pelanggan dapat mengubah data diri dan password
 - **Halaman Kontak** — Form pengiriman pesan langsung ke sistem
 
 ### 🔐 Autentikasi & Keamanan
 - **Registrasi & Login** — Sistem auth lengkap dengan validasi form
+- **Lupa Password** — Sistem simulasi reset password tanpa perlu setting email SMTP sungguhan
 - **Rate Limiting** — Proteksi brute-force (maks 5 percobaan/menit per IP)
-- **Activity Log** — Setiap aksi login, register, dan logout tercatat otomatis
 - **Role-Based Access** — Peran `user` dan `admin` dengan middleware terpisah
-- **Session Security** — Regenerasi token sesi setiap login/logout
 
 ### 🛠️ Panel Admin
 - **Dashboard Admin** — Ringkasan data transaksi dan aktivitas pengguna
+- **Kelola Produk & Brand** — Menambah produk, edit stok, deskripsi, dan gambar
 - **Akses Terbatas** — Hanya dapat diakses oleh akun dengan role `admin`
 
 ---
@@ -67,61 +86,12 @@ Proyek ini dibangun sebagai portfolio pengembangan web full-stack menggunakan ek
 
 | Kategori | Teknologi |
 |---|---|
-| **Framework Backend** | Laravel 12.x |
+| **Framework Backend** | Laravel |
 | **Bahasa** | PHP 8.2+ |
-| **Frontend CSS** | Tailwind CSS 4.x |
-| **Build Tool** | Vite 7.x |
-| **Database** | SQLite (development) / MySQL (production) |
-| **Payment Gateway** | Midtrans PHP SDK |
+| **Frontend CSS** | Vanilla CSS / CSS Modules |
+| **Build Tool** | Vite |
+| **Database** | SQLite (development) |
 | **Auth** | Laravel Built-in Authentication |
-| **Testing** | PHPUnit 11.x |
-| **Dev Tools** | Laravel Sail, Laravel Pail, Laravel Pint |
-
----
-
-## 📁 Struktur Proyek
-
-```
-arven-parfum/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── AuthController.php       # Login, Register, Logout
-│   │   │   ├── CheckoutController.php   # Proses & riwayat checkout
-│   │   │   ├── ContactController.php    # Kirim pesan kontak
-│   │   │   └── AdminController.php      # Dashboard admin
-│   │   └── Middleware/
-│   ├── Models/
-│   │   ├── User.php                     # Model pengguna dengan role & activity
-│   │   ├── Checkout.php                 # Model transaksi checkout
-│   │   ├── CheckoutItem.php             # Item detail per transaksi
-│   │   ├── ContactMessage.php           # Pesan dari form kontak
-│   │   └── ActivityLog.php              # Log aktivitas pengguna
-│   └── Services/
-│       └── AuthService.php              # Service layer untuk auth & logging
-├── database/
-│   └── migrations/                      # Semua schema tabel database
-├── public/
-│   ├── css/                             # Stylesheet halaman spesifik
-│   ├── img/                             # Asset gambar produk & UI
-│   └── brand/                           # Asset gambar per brand parfum
-├── resources/
-│   └── views/                           # Blade templates (halaman & komponen)
-├── routes/
-│   └── web.php                          # Definisi semua route aplikasi
-└── vite.config.js                       # Konfigurasi build frontend
-```
-
----
-
-## ⚙️ Persyaratan Sistem
-
-Pastikan sistem Anda memenuhi persyaratan berikut sebelum instalasi:
-
-- **PHP** >= 8.2 dengan ekstensi: `pdo`, `pdo_sqlite` (atau `pdo_mysql`), `mbstring`, `openssl`, `tokenizer`, `xml`
-- **Composer** >= 2.x
-- **Node.js** >= 18.x & **NPM** >= 9.x
-- **Git**
 
 ---
 
@@ -150,30 +120,6 @@ Perintah ini akan secara otomatis:
 - Menginstal dependensi Node.js (`npm install`)
 - Mem-build asset frontend (`npm run build`)
 
-### 3. Setup Manual (Alternatif)
-
-Jika ingin melakukan setup step-by-step:
-
-```bash
-# Instal dependensi PHP
-composer install
-
-# Salin file environment
-cp .env.example .env
-
-# Generate application key
-php artisan key:generate
-
-# Jalankan migrasi database
-php artisan migrate
-
-# Instal dependensi Node.js
-npm install
-
-# Build asset frontend
-npm run build
-```
-
 ---
 
 ## 🔧 Konfigurasi Environment
@@ -187,20 +133,7 @@ APP_URL=http://localhost:8000
 
 # Database (SQLite untuk development)
 DB_CONNECTION=sqlite
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=arven_parfum
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# Midtrans Payment Gateway
-MIDTRANS_SERVER_KEY=your_server_key_here
-MIDTRANS_CLIENT_KEY=your_client_key_here
-MIDTRANS_IS_PRODUCTION=false
 ```
-
-> **Catatan:** Untuk mode development/simulasi, integrasi Midtrans tidak memerlukan API key yang valid. Transaksi akan tersimpan dengan status `simulation`.
 
 ---
 
@@ -215,112 +148,12 @@ composer run dev
 Perintah ini menjalankan secara paralel:
 - `php artisan serve` — Web server di `http://localhost:8000`
 - `npm run dev` — Vite HMR untuk hot-reload frontend
-- `php artisan queue:listen` — Worker untuk job queue
-- `php artisan pail` — Real-time log viewer
-
-### Mode Produksi
-
-```bash
-npm run build
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan serve
-```
-
----
-
-## 📖 Panduan Penggunaan
-
-### Akses Halaman Utama
-
-| URL | Deskripsi |
-|---|---|
-| `/` | Beranda utama |
-| `/koleksi` | Katalog semua parfum |
-| `/koleksi/{brand}` | Produk per brand (contoh: `/koleksi/hermes`) |
-| `/cart` | Keranjang belanja |
-| `/contact` | Halaman kontak |
-| `/about` | Tentang Arven Parfum |
-
-### Autentikasi
-
-| URL | Deskripsi |
-|---|---|
-| `/register` | Daftar akun baru |
-| `/login` | Masuk ke akun |
-| `/checkout/history` | Riwayat pesanan (perlu login) |
-
-### Panel Admin
-
-| URL | Deskripsi |
-|---|---|
-| `/admin/dashboard` | Dashboard admin (perlu login + role admin) |
-
-### Membuat Akun Admin
-
-```bash
-php artisan tinker
-```
-
-```php
-\App\Models\User::create([
-    'full_name' => 'Administrator',
-    'email'     => 'admin@arvenparfum.com',
-    'password'  => 'password123',
-    'role'      => 'admin',
-    'is_active' => true,
-]);
-```
-
----
-
-## 🧪 Menjalankan Test
-
-```bash
-# Jalankan semua test
-composer run test
-
-# Atau langsung via artisan
-php artisan test
-```
-
----
-
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Berikut langkah-langkahnya:
-
-1. **Fork** repository ini
-2. Buat **branch** fitur baru: `git checkout -b feature/nama-fitur`
-3. **Commit** perubahan: `git commit -m 'feat: tambahkan fitur X'`
-4. **Push** ke branch: `git push origin feature/nama-fitur`
-5. Buat **Pull Request**
-
-### Konvensi Commit
-
-Gunakan format [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: menambahkan fitur baru
-fix: memperbaiki bug
-docs: memperbarui dokumentasi
-style: perubahan format/style kode
-refactor: refactoring kode
-test: menambahkan atau memperbarui test
-```
-
----
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
 <div align="center">
 
-Dibuat dengan ❤️ menggunakan **Laravel** & **Tailwind CSS**
+Dibuat untuk keperluan Latihan Pembelajaran. ❤️ **Laravel** & **Arven Parfume**
 
 **[⬆ Kembali ke Atas](#-arven-parfum)**
 

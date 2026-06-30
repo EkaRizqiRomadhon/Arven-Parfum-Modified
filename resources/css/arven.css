@@ -18,7 +18,7 @@
 @import '../../public/css/style.css';
 
 /* ── 2. Authentication (Login / Register) ───────────────────────────────────── */
-@import '../../public/css/auth_styles.css';
+/* Styles for Auth have been moved inline to blade templates to match Nike design */
 
 /* ── 3. Homepage ─────────────────────────────────────────────────────────────── */
 @import '../../public/css/styleindex.css';

@@ -39,8 +39,12 @@ window.changeQty = function(id, delta) {
   const cart = readCart();
   const idx = cart.findIndex(i => i.id == id);
   if (idx >= 0) {
-    // Min qty 1
-    cart[idx].qty = Math.max(1, (cart[idx].qty || 1) + delta);
+    const newQty = (cart[idx].qty || 1) + delta;
+    if (cart[idx].stock !== undefined && newQty > cart[idx].stock) {
+        showToast('Jumlah melebihi stok yang tersedia.', 'error', 'Stok Terbatas');
+        return;
+    }
+    cart[idx].qty = Math.max(1, newQty);
     writeCart(cart);
   }
 };
@@ -158,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Header Scroll Effect
   window.addEventListener("scroll", function() {
-    const header = document.getElementById("mainHeader");
+    const header = document.getElementById("siteHeader");
     if (header) {
       if (window.scrollY > 50) {
         header.classList.add("scrolled");
@@ -170,9 +174,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Button Listeners
   const clearBtn = document.getElementById('clearBtn');
-  if (clearBtn) {
+  const clearCartModal  = document.getElementById('clearCartModal');
+  const clearCartConfirm = document.getElementById('clearCartConfirm');
+  const clearCartCancel  = document.getElementById('clearCartCancel');
+
+  if (clearBtn && clearCartModal) {
+    // Buka modal saat tombol "Kosongkan Keranjang" diklik
     clearBtn.addEventListener('click', () => {
-      if(confirm('Apakah Anda yakin ingin mengosongkan keranjang?')) clearCart();
+      if (readCart().length === 0) {
+        showToast('Keranjang sudah kosong, tidak ada yang perlu dihapus.', 'info', 'Keranjang Kosong');
+        return;
+      }
+      clearCartModal.style.display = 'flex';
+    });
+
+    // Konfirmasi: kosongkan dan tutup modal
+    clearCartConfirm.addEventListener('click', () => {
+      clearCart();
+      clearCartModal.style.display = 'none';
+      showToast('Keranjang berhasil dikosongkan.', 'success', 'Keranjang Kosong');
+    });
+
+    // Batal: tutup saja modalnya
+    clearCartCancel.addEventListener('click', () => {
+      clearCartModal.style.display = 'none';
+    });
+
+    // Klik backdrop (luar modal) juga menutup modal
+    clearCartModal.addEventListener('click', (e) => {
+      if (e.target === clearCartModal) clearCartModal.style.display = 'none';
     });
   }
 
@@ -182,97 +212,181 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (checkoutBtn && modal) {
     checkoutBtn.addEventListener('click', () => {
+       const isAuth = document.querySelector('meta[name="auth-check"]')?.getAttribute('content') === 'true';
+       if (!isAuth) {
+           showToast('Silakan login terlebih dahulu untuk melanjutkan checkout.', 'info', 'Login Diperlukan');
+           setTimeout(() => window.location.href = '/login', 1800);
+           return;
+       }
+
        const cart = readCart();
-       if(cart.length === 0) return alert("Keranjang kosong");
-       
-       // Hitung total untuk di modal
+       if(cart.length === 0) {
+           showToast('Keranjang Anda masih kosong.', 'error', 'Keranjang Kosong');
+           return;
+       }
+
+       // Hitung total
        const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
        document.getElementById('modalTotalText').textContent = currency(subtotal);
-       
-       // Tampilkan modal
+       document.getElementById('modalOrderIdText').textContent = '—';
+
+       // Tampilkan modal dulu, lalu buat order
        modal.style.display = 'flex';
+       checkoutBtn.disabled = true;
+       checkoutBtn.textContent = 'Memproses...';
+
+       // Buat order (status: pending)
+       fetch('/checkout/process', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+               'Accept': 'application/json'
+           },
+           body: JSON.stringify({ cart: cart })
+       })
+       .then(res => res.json())
+       .then(data => {
+           checkoutBtn.disabled = false;
+           checkoutBtn.textContent = 'Secure Checkout';
+
+           if (!data.success) {
+               modal.style.display = 'none';
+               showToast('Gagal membuat pesanan. Silakan coba lagi.', 'error', 'Error');
+               return;
+           }
+
+           // Simpan orderId ke global agar processSimulatedPayment bisa pakai
+           window._pendingOrderId = data.orderId;
+           document.getElementById('modalOrderIdText').textContent = '#' + data.orderId;
+       })
+       .catch(err => {
+           checkoutBtn.disabled = false;
+           checkoutBtn.textContent = 'Secure Checkout';
+           modal.style.display = 'none';
+           showToast('Terjadi kesalahan koneksi.', 'error', 'Error');
+       });
     });
     
     closeModalBtn.addEventListener('click', () => {
         modal.style.display = 'none';
+        // Reset state
+        window._pendingOrderId = null;
+        document.getElementById('paymentMethodsView').style.display = 'block';
+        document.getElementById('paymentLoadingView').style.display = 'none';
+        document.getElementById('paymentSuccessView').style.display = 'none';
+        document.getElementById('closeModalBtn').style.display = 'block';
+        document.querySelectorAll('.pay-method-btn').forEach(btn => {
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+        });
     });
   }
 
-  // Fungsi yang dipanggil dari tombol di dalam modal
+  // ─── PAYMENT SIMULATOR ────────────────────────────────────────────────────
+  // Dipanggil dari onclick tombol metode di cart.blade.php
   window.processSimulatedPayment = function(method) {
-      const loading = document.getElementById('paymentLoading');
-      const buttons = document.querySelectorAll('.pay-method-btn');
-      const cart = readCart();
-      
-      if (cart.length === 0) return alert("Keranjang kosong");
+    if (!window._pendingOrderId) {
+      showToast('Order belum siap. Silakan tutup dan coba lagi.', 'error', 'Error');
+      return;
+    }
 
-      // Sembunyikan tombol, tampilkan loading
-      buttons.forEach(btn => btn.style.display = 'none');
-      loading.style.display = 'block';
-      
-      // ─── KIRIM DATA KE BACKEND API ─────────────────────────────────────────
-      // Mengirim data keranjang ke server agar tersimpan di riwayat belanja (database)
-      fetch('/checkout/process', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-              'Accept': 'application/json'
-          },
-          body: JSON.stringify({ cart: cart })
-      })
-      .then(response => response.json())
-      .then(data => {
-          if (data.snapToken) {
-              // Simulasi: Karena ini Arven Pay (Simulasi), kita anggap langsung sukses
-              alert(`✅ Checkout Berhasil!\nOrder ID: ${data.orderId}\n\nPembayaran menggunakan ${method} telah diterima.`);
-              
-              // Kosongkan keranjang & tutup modal
-              clearCart();
-              if (document.getElementById('paymentModal')) {
-                  document.getElementById('paymentModal').style.display = 'none';
-              }
-              
-              // Redirect ke beranda setelah berhasil
-              window.location.href = '/';
-          } else {
-              alert("Gagal memproses checkout: " + (data.error || "Unknown error"));
-              // Kembalikan tombol jika gagal
-              buttons.forEach(btn => btn.style.display = 'flex');
-              loading.style.display = 'none';
-          }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert("Terjadi kesalahan saat menghubungi server.");
-          // Kembalikan tombol jika error
-          buttons.forEach(btn => btn.style.display = 'flex');
-          loading.style.display = 'none';
+    const orderId = window._pendingOrderId;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Disable semua tombol metode
+    document.querySelectorAll('.pay-method-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.5';
+    });
+
+    // Pindah ke view loading
+    document.getElementById('paymentMethodsView').style.display = 'none';
+    document.getElementById('paymentLoadingView').style.display = 'block';
+
+    // STEP 1: pending → processing
+    fetch(`/payment/${orderId}/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+      body: JSON.stringify({ method: method })
+    })
+    .then(() => {
+      // STEP 2: delay 3 detik (simulasi waktu verifikasi bank)
+      return new Promise(resolve => setTimeout(resolve, 3000));
+    })
+    .then(() => {
+      // STEP 3: processing → paid
+      return fetch(`/payment/${orderId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: JSON.stringify({ status: 'paid' })
+      }).then(res => res.json());
+    })
+    .then(res => {
+      if (res.success) {
+        // Kosongkan keranjang lokal
+        clearCart();
+
+        // Tampilkan success screen
+        document.getElementById('paymentLoadingView').style.display = 'none';
+        document.getElementById('paymentSuccessView').style.display = 'block';
+        document.getElementById('closeModalBtn').style.display = 'none';
+
+        // Isi detail sukses
+        document.getElementById('successOrderId').textContent  = '#' + orderId;
+        document.getElementById('successTotal').textContent    = document.getElementById('modalTotalText').textContent;
+        document.getElementById('successMethod').textContent   = method;
+
+        showToast(`Pembayaran via ${method} berhasil!`, 'success', 'Checkout Berhasil');
+      }
+    })
+    .catch(err => {
+      console.error('Payment error:', err);
+      showToast('Terjadi kesalahan saat memproses pembayaran.', 'error', 'Error');
+
+      // Kembalikan ke pilihan metode
+      document.getElementById('paymentMethodsView').style.display = 'block';
+      document.getElementById('paymentLoadingView').style.display = 'none';
+      document.querySelectorAll('.pay-method-btn').forEach(btn => {
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
       });
+    });
   };
 
-  // 3. Add to Cart Listeners (Brand Pages)
-  window.addToCart = function(id, name, price, image) {
+  // ─── ADD TO CART (dari halaman brand) ─────────────────────────────────────
+  window.addToCart = function(id, name, price, image, stock) {
+    stock = parseInt(stock) || 0;
     const cart = readCart();
     const existing = cart.find(i => i.id === id);
     if (existing) {
+      if (existing.qty + 1 > stock) {
+          showToast(`Maaf, stok ${name} tidak mencukupi.`, 'error', 'Stok Terbatas');
+          return;
+      }
       existing.qty += 1;
+      existing.stock = stock;
+      showToast(`Jumlah ${name} diperbarui di keranjang.`, 'success', 'Keranjang Diperbarui');
     } else {
-      cart.push({ id, name, price: parseInt(price), image, qty: 1 });
+      if (stock < 1) {
+          showToast(`Maaf, stok ${name} habis.`, 'error', 'Stok Habis');
+          return;
+      }
+      cart.push({ id, name, price: parseInt(price), image, qty: 1, stock: stock });
+      showToast(`${name} berhasil ditambahkan ke keranjang.`, 'success', 'Ditambahkan');
     }
     writeCart(cart);
-    alert(`${name} telah ditambahkan ke keranjang!`);
   };
 
   const addToCartBtns = document.querySelectorAll('.add-to-cart');
   addToCartBtns.forEach(btn => {
     btn.addEventListener('click', function() {
-      const id = this.dataset.id;
-      const name = this.dataset.name;
+      const id    = this.dataset.id;
+      const name  = this.dataset.name;
       const price = this.dataset.price;
-      const img = this.dataset.img;
-      
-      window.addToCart(id, name, price, img);
+      const img   = this.dataset.img;
+      const stock = this.dataset.stock;
+      window.addToCart(id, name, price, img, stock);
     });
   });
 });

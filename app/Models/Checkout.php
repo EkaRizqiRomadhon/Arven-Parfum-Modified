@@ -13,6 +13,7 @@ class Checkout extends Model
         'order_id',
         'gross_amount',
         'status',
+        'payment_status',
         'snap_token',
         'payment_type',
     ];

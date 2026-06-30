@@ -8,24 +8,23 @@
     <h1>HUBUNGI KAMI</h1>
     <p>Silakan isi formulir di bawah ini untuk pertanyaan atau pemesanan.</p>
 
-    {{-- ── Pesan sukses dari Laravel session ──────────────────────────── --}}
+    {{-- ── Toast Notification menggantikan Alert HTML ───────────────────── --}}
     @if(session('success'))
-      <div class="alert" role="alert"
-        style="background:#d4edda;color:#155724;padding:15px;border-radius:5px;margin-bottom:20px;">
-        {{ session('success') }}
-      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          showToast("{{ session('success') }}", 'success');
+        });
+      </script>
     @endif
 
-    {{-- ── Error validasi dari Laravel ────────────────────────────────── --}}
     @if($errors->any())
-      <div class="alert" role="alert"
-        style="background:#f8d7da;color:#721c24;padding:15px;border-radius:5px;margin-bottom:20px;">
-        <ul style="margin:0;padding-left:20px">
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
           @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
+            showToast("{{ $error }}", 'error');
           @endforeach
-        </ul>
-      </div>
+        });
+      </script>
     @endif
 
     <div class="contact-container">

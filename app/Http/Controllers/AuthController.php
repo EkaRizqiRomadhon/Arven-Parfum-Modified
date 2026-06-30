@@ -34,9 +34,16 @@ class AuthController extends Controller
             $this->authService->logActivity(
                 userId:      Auth::id(),
                 action:      'login',
-                description: 'User berhasil login via web.',
+                description: 'User berhasil login.',
                 ipAddress:   $request->ip(),
             );
+
+            // Admin yang kesasar ke /login diarahkan ke panel admin
+            if (Auth::user()->role === 'admin') {
+                Auth::logout(); // Keluarkan dari guard web
+                return redirect()->route('admin.login')
+                    ->with('info', 'Gunakan halaman login admin untuk masuk ke panel.');
+            }
 
             return redirect()->intended('/');
         }
