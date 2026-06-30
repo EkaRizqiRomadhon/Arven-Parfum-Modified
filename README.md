@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌸 Arven Parfum — Modified
+# Arven Parfum — Modified
 
 **Platform E-Commerce Parfum Modern Berbasis Laravel**
 
